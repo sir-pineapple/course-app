@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
-mongoose.connect("mongodb+srv://admin:wi8ptni9a6KfUDzG@cluster0.r9q1pgw.mongodb.net/course-app");
+const fs = require("fs");
+mongoose.connect(fs.readFileSync("./.mongolink", "utf8"));
 const Schema = mongoose.Schema;
 const ObjectId = mongoose.Types.ObjectId;
 
