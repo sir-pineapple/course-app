@@ -1,6 +1,5 @@
-const mongoose = require("mongoose");
-const fs = require("fs");
-mongoose.connect(fs.readFileSync("./.mongolink", "utf8"));
+const mongoose = require('mongoose');
+
 const Schema = mongoose.Schema;
 const ObjectId = mongoose.Types.ObjectId;
 
