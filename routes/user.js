@@ -1,9 +1,10 @@
 const { Router } = require('express');
 const userRouter = Router();
-const { userModel, puchaseModel, courseModel } = require("../db");
+const { userModel, puchaseModel, courseModel, purchaseModel } = require("../db");
+const { userMiddleware } = require("../middleware/user");
 
 const jwt = require('jsonwebtoken');
-const JWT_USER_PASSWORD = process.env.JWT_USER_PASSWORD;
+const { JWT_USER_PASSWORD } = require("../config");
 
 userRouter.post("/signup", async (req, res) => {
     const { email, password, firstName, lastName } = req.body;
@@ -33,11 +34,28 @@ userRouter.post("/signin", async (req, res) => {
         });
     }
     else {
-        res.status(403).json({message: "Incorrect Credentials"})
+        res.status(403).json({
+            message: "Incorrect Credentials"
+        })
     }
 })
 
-userRouter.get("/purchases", (req, res) => {
+userRouter.get("/purchases", userMiddleware, async (req, res) => {
+    const userId = req.userId;
+    const purchases = await purchaseModel.find({
+        userId
+    })
+    let purchasedCourseIds = [];
+    for (let i=0; i<purchases.length; i++) {
+        purchasedCourseIds.push(purchases[i].courseId)
+    }
+    const coursesData = await courseModel.find({
+        _id: { $in: purchasedCourseIds }
+    })
+    res.json({
+        purchases,
+        coursesData
+    })
 })
 
 module.exports = {

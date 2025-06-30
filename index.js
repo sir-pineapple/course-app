@@ -2,10 +2,9 @@ const express = require('express');
 const app = express();
 app.use(express.json());
 const port = 3000;
-const mongoose = require('mongoose');
-
 require('dotenv').config();
-const mongoURI = process.env.MONGO_URI;
+const mongoose = require('mongoose');
+const { MONGO_URI } = require("./config");
 
 const { userRouter } = require("./routes/user");
 const { courseRouter } = require("./routes/course");
@@ -16,7 +15,7 @@ app.use("/course", courseRouter);
 app.use("/admin", adminRouter);
 
 async function main() {
-    await mongoose.connect(mongoURI);
+    await mongoose.connect(MONGO_URI);
     app.listen(port);
 }
 
