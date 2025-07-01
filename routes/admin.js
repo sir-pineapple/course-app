@@ -6,11 +6,14 @@ const  { adminMiddleware } = require("../middleware/admin");
 const jwt = require('jsonwebtoken');
 const { JWT_ADMIN_PASSWORD } = require("../config");
 
+const bcrypt = require('bcrypt');
+
 adminRouter.post("/signup", async (req, res) => {
     const { email, password, firstName, lastName } = req.body;
+    const hash = await bcrypt.hash(password, 10);
     await adminModel.create({
         email,
-        password,
+        password: hash,
         firstName,
         lastName
     });
@@ -22,16 +25,23 @@ adminRouter.post("/signup", async (req, res) => {
 adminRouter.post("/signin", async (req, res) => {
     const {email, password } = req.body;
     const admin = await adminModel.findOne({
-        email,
-        password
+        email
     })
     if (admin) {
-        const token = jwt.sign({
-            id: admin._id
-        }, JWT_ADMIN_PASSWORD);
-        res.json({
-            token: token
-        });
+        const match = await bcrypt.compare(password, admin.password);
+        if (match) {
+            const token = jwt.sign({
+                id: admin._id
+            }, JWT_ADMIN_PASSWORD);
+            res.json({
+                token: token
+            })
+        }
+        else {
+            res.status(403).json({
+                message: "Incorrect Credentials"
+            })
+        }
     }
     else {
         res.status(403).json({

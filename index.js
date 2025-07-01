@@ -17,6 +17,7 @@ app.use("/admin", adminRouter);
 async function main() {
     await mongoose.connect(MONGO_URI);
     app.listen(port);
+    console.log("listening on port", port);
 }
 
 main();

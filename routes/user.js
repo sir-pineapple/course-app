@@ -6,11 +6,14 @@ const { userMiddleware } = require("../middleware/user");
 const jwt = require('jsonwebtoken');
 const { JWT_USER_PASSWORD } = require("../config");
 
+const bcrypt = require('bcrypt');
+
 userRouter.post("/signup", async (req, res) => {
     const { email, password, firstName, lastName } = req.body;
+    const hash = await bcrypt.hash(password, 10);
     await userModel.create({
         email,
-        password,
+        password: hash,
         firstName,
         lastName
     });
@@ -22,16 +25,23 @@ userRouter.post("/signup", async (req, res) => {
 userRouter.post("/signin", async (req, res) => {
     const {email, password } = req.body;
     const user = await userModel.findOne({
-        email,
-        password
+        email
     })
     if (user) {
-        const token = jwt.sign({
-            id: user._id
-        }, JWT_USER_PASSWORD);
-        res.json({
-            token: token
-        });
+        const match = await bcrypt.compare(password, user.password);
+        if (match) {
+            const token = jwt.sign({
+                id: user._id
+            }, JWT_USER_PASSWORD);
+            res.json({
+                token: token
+            })
+        }
+        else {
+            res.status(403).json({
+                message: "Incorrect Credentials"
+            })
+        }
     }
     else {
         res.status(403).json({
