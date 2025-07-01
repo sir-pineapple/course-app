@@ -1,1 +1,1 @@
-A course selling application using MongoDB, ExpressJS and NodeJS
+A course selling application using MongoDB, Express.js and Node.js
